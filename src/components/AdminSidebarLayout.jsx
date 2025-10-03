@@ -7,7 +7,7 @@ export default function SidebarLayout({ children }) {
   const [showTherapistModal, setShowTherapistModal] = useState(false)
   const handleLogout = () => {
   localStorage.removeItem("user")
-  window.location.href = "/login"
+  window.location.href = "/therapro-proto/login"
 }
 
   return (
