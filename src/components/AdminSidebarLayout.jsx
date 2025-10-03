@@ -71,7 +71,7 @@ export default function SidebarLayout({ children }) {
       <main
   className="flex-1 bg-gray-50 p-6 overflow-y-auto relative"
   style={{
-    backgroundImage: "url('/CSN logowopacity.png')",
+    backgroundImage: "url('${import.meta.env.BASE_URL}CSN_logowopacity.png')",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center", // stays at the top and moves with scroll
     backgroundSize: "480px",

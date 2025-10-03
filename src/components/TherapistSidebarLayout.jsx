@@ -81,7 +81,7 @@ export default function TherapistSidebarLayout({ children }) {
       <main
         className="flex-1 bg-gray-50 p-6 overflow-y-auto relative"
         style={{
-          backgroundImage: "url('/CSN logowopacity.png')", // same as admin
+          backgroundImage: "url('${import.meta.env.BASE_URL}CSN_logowopacity.png')", // same as admin
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center", // centered, moves as you scroll
           backgroundSize: "480px",

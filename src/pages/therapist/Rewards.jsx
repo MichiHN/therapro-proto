@@ -9,25 +9,25 @@ export default function Rewards() {
     {
       title: "Laundry Master",
       description: "Awarded for completing all levels of the Sort Laundry Game.",
-      image: "/rewards/laundry champ nonpx from pngtree.png",
+      image: "${import.meta.env.BASE_URL}/rewards/laundry_champ_nonpx_from_pngtree.png",
       stars: 3,
     },
     {
       title: "Handwashing Hero",
       description: "Earned by finishing all levels of the Wash Hands Game.",
-      image: "/rewards/pngtree-creative-art-of-beautifull-boy-in-white-t-shirt-washing-hands-png-image_13755041.png",
+      image: "${import.meta.env.BASE_URL}/rewards/pngtree-creative-art-of-beautifull-boy-in-white-t-shirt-washing-hands-png-image_13755041.png",
       stars: 4,
     },
     {
       title: "Consistency Champion",
       description: "Given for completing the all the activities during cycle.",
-      image: "/rewards/consistent boy ai image.png",
+      image: "${import.meta.env.BASE_URL}/rewards/consistent_boy_ai_image.png",
       stars: 5,
     },
     {
       title: "Level Up Legend",
       description: "Unlock this by reaching the highest level in any game.",
-      image: "/rewards/level up boy ai.png",
+      image: "${import.meta.env.BASE_URL}/rewards/level_up_boy_ai.png",
       stars: 2,
     },
   ]
