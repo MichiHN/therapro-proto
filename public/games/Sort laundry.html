@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry Sorting Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .score, .timer, .level, .difficulty, .lives {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .lives {
+            color: #dc3545;
+        }
+
+        .difficulty-selector {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-selector h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 100px;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border-color: #007bff;
+        }
+
+        .difficulty-btn.easy {
+            border-color: #28a745;
+        }
+
+        .difficulty-btn.medium {
+            border-color: #ffc107;
+        }
+
+        .difficulty-btn.hard {
+            border-color: #dc3545;
+        }
+
+        .difficulty-btn.expert {
+            border-color: #6f42c1;
+        }
+
+        .difficulty-btn.easy.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-color: #28a745;
+        }
+
+        .difficulty-btn.medium.active {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            border-color: #ffc107;
+        }
+
+        .difficulty-btn.hard.active {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border-color: #dc3545;
+        }
+
+        .difficulty-btn.expert.active {
+            background: linear-gradient(45deg, #6f42c1, #5a32a3);
+            border-color: #6f42c1;
+        }
+
+        .baskets-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .basket {
+            width: 120px;
+            height: 120px;
+            border: 4px dashed #ccc;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            position: relative;
+        }
+
+        .basket.drag-over {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+            transform: scale(1.05);
+        }
+
+        .basket.correct {
+            animation: correctDrop 0.6s ease;
+        }
+
+        .basket.incorrect {
+            animation: incorrectDrop 0.6s ease;
+        }
+
+        @keyframes correctDrop {
+            0% { background: rgba(40, 167, 69, 0.3); }
+            100% { background: rgba(255, 255, 255, 0.8); }
+        }
+
+        @keyframes incorrectDrop {
+            0% { background: rgba(220, 53, 69, 0.3); }
+            50% { transform: translateX(-5px); }
+            100% { 
+                background: rgba(255, 255, 255, 0.8);
+                transform: translateX(0);
+            }
+        }
+
+        .basket-label {
+            font-weight: bold;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            color: #495057;
+        }
+
+        .basket-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+
+        .whites { background: #ffffff; border: 2px solid #ddd; }
+        .lights { background: linear-gradient(45deg, #ffeb3b, #ffc107); }
+        .darks { background: linear-gradient(45deg, #333, #666); }
+        .colors { background: linear-gradient(45deg, #e91e63, #9c27b0, #3f51b5, #00bcd4); }
+
+        .clothes-container {
+            min-height: 200px;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: flex-start;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .clothing-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            user-select: none;
+        }
+
+        .clothing-item:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .clothing-item:active {
+            cursor: grabbing;
+            transform: rotate(5deg);
+        }
+
+        .clothing-item.dragging {
+            opacity: 0.7;
+            transform: rotate(10deg) scale(1.2);
+            z-index: 1000;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .top-left-button {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .top-left-button .btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translate(-20px, -20px);
+        }
+
+
+        .game-over {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .baskets-container {
+                justify-content: center;
+            }
+            
+            .basket {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .clothing-item {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="top-left-button">
+       
+    </div>
+
+        <div class="game-header">
+            <h1 class="game-title">🧺 Laundry Sorting Game</h1>
+            <p>Drag and drop clothes into the correct baskets!</p>
+        </div>
+
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="level">Level: <span id="level">1</span></div>
+            <div class="difficulty">Difficulty: <span id="currentDifficulty">Easy</span></div>
+            <div class="lives">Lives: <span id="lives">3</span></div>
+        </div>
+
+        <div class="difficulty-selector">
+            <h3>Select Difficulty</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn easy active" onclick="setDifficulty('easy')">Easy</button>
+                <button class="difficulty-btn medium" onclick="setDifficulty('medium')">Medium</button>
+                <button class="difficulty-btn hard" onclick="setDifficulty('hard')">Hard</button>
+                <button class="difficulty-btn expert" onclick="setDifficulty('expert')">Expert</button>
+            </div>
+        </div>
+
+        <div class="baskets-container">
+            <div class="basket" data-category="whites">
+                <div class="basket-icon whites"></div>
+                <div class="basket-label">Whites</div>
+            </div>
+            <div class="basket" data-category="lights">
+                <div class="basket-icon lights"></div>
+                <div class="basket-label">Lights</div>
+            </div>
+            <div class="basket" data-category="darks">
+                <div class="basket-icon darks"></div>
+                <div class="basket-label">Darks</div>
+            </div>
+            <div class="basket" data-category="colors">
+                <div class="basket-icon colors"></div>
+                <div class="basket-label">Colors</div>
+            </div>
+        </div>
+
+        <div class="clothes-container" id="clothesContainer">
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startGame()">New Game</button>
+            <button class="btn btn-success" onclick="nextLevel()">Next Level</button>
+        </div>
+
+        <div class="game-over hidden" id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Thanks for playing!</p>
+        </div>
+    </div>
+
+    <script>
+        const clothingItems = [
+            { emoji: '👕', color: 'white', category: 'whites' },
+            { emoji: '👖', color: '#1e3a8a', category: 'darks' },
+            { emoji: '👔', color: 'white', category: 'whites' },
+            { emoji: '🩳', color: '#dc2626', category: 'colors' },
+            { emoji: '👗', color: '#ec4899', category: 'colors' },
+            { emoji: '🧥', color: '#374151', category: 'darks' },
+            { emoji: '👚', color: '#fbbf24', category: 'lights' },
+            { emoji: '🩱', color: '#3b82f6', category: 'colors' },
+            { emoji: '🧦', color: 'white', category: 'whites' },
+            { emoji: '👒', color: '#92400e', category: 'darks' },
+            { emoji: '🩲', color: '#d4d4d8', category: 'lights' },
+            { emoji: '👘', color: '#7c3aed', category: 'colors' }
+        ];
+
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let correctSorts = 0;
+        let incorrectSorts = 0;
+        let gameActive = false;
+        let currentClothes = [];
+        let difficulty = 'easy';
+        let mistakesThisLevel = 0;
+
+        const difficultySettings = {
+            easy: {
+                itemCount: 4,
+                scoreMultiplier: 1,
+                maxLives: 5,
+                levelUpRequirement: 3, // Complete 3 levels to advance
+                allowedMistakes: 2, // Mistakes allowed per level
+                colorVariation: 'simple', // Simple color variations
+                itemSizes: 'large'
+            },
+            medium: {
+                itemCount: 6,
+                scoreMultiplier: 1.5,
+                maxLives: 4,
+                levelUpRequirement: 4,
+                allowedMistakes: 1,
+                colorVariation: 'moderate',
+                itemSizes: 'medium'
+            },
+            hard: {
+                itemCount: 8,
+                scoreMultiplier: 2,
+                maxLives: 3,
+                levelUpRequirement: 5,
+                allowedMistakes: 1,
+                colorVariation: 'complex', // More similar colors
+                itemSizes: 'small'
+            },
+            expert: {
+                itemCount: 10,
+                scoreMultiplier: 3,
+                maxLives: 2,
+                levelUpRequirement: 6,
+                allowedMistakes: 0, // No mistakes allowed
+                colorVariation: 'extreme',
+                itemSizes: 'tiny'
+            }
+        };
+
+        // Enhanced clothing items with more color variations for difficulty
+        const clothingItemsByDifficulty = {
+            simple: [
+                { emoji: '👕', color: '#ffffff', category: 'whites' },
+                { emoji: '👖', color: '#1a1a1a', category: 'darks' },
+                { emoji: '👔', color: '#ffffff', category: 'whites' },
+                { emoji: '🩳', color: '#ff0000', category: 'colors' },
+                { emoji: '👗', color: '#ff69b4', category: 'colors' },
+                { emoji: '🧥', color: '#333333', category: 'darks' },
+                { emoji: '👚', color: '#ffff99', category: 'lights' },
+                { emoji: '🩱', color: '#0066ff', category: 'colors' }
+            ],
+            moderate: [
+                { emoji: '👕', color: '#f5f5f5', category: 'whites' },
+                { emoji: '👖', color: '#2c2c2c', category: 'darks' },
+                { emoji: '👔', color: '#ffffff', category: 'whites' },
+                { emoji: '🩳', color: '#cc0000', category: 'colors' },
+                { emoji: '👗', color: '#e91e63', category: 'colors' },
+                { emoji: '🧥', color: '#404040', category: 'darks' },
+                { emoji: '👚', color: '#ffffcc', category: 'lights' },
+                { emoji: '🩱', color: '#3366cc', category: 'colors' },
+                { emoji: '🧦', color: '#f0f0f0', category: 'whites' },
+                { emoji: '👒', color: '#654321', category: 'darks' }
+            ],
+            complex: [
+                { emoji: '👕', color: '#f8f8f8', category: 'whites' },
+                { emoji: '👖', color: '#3a3a3a', category: 'darks' },
+                { emoji: '👔', color: '#fafafa', category: 'whites' },
+                { emoji: '🩳', color: '#b30000', category: 'colors' },
+                { emoji: '👗', color: '#d81b60', category: 'colors' },
+                { emoji: '🧥', color: '#505050', category: 'darks' },
+                { emoji: '👚', color: '#ffffe0', category: 'lights' },
+                { emoji: '🩱', color: '#4d79a4', category: 'colors' },
+                { emoji: '🧦', color: '#eeeeee', category: 'whites' },
+                { emoji: '👒', color: '#5a4a3a', category: 'darks' },
+                { emoji: '🩲', color: '#e6e6e6', category: 'lights' },
+                { emoji: '👘', color: '#8e24aa', category: 'colors' }
+            ],
+            extreme: [
+                { emoji: '👕', color: '#f9f9f9', category: 'whites' },
+                { emoji: '👖', color: '#444444', category: 'darks' },
+                { emoji: '👔', color: '#fcfcfc', category: 'whites' },
+                { emoji: '🩳', color: '#990000', category: 'colors' },
+                { emoji: '👗', color: '#c2185b', category: 'colors' },
+                { emoji: '🧥', color: '#606060', category: 'darks' },
+                { emoji: '👚', color: '#fffacd', category: 'lights' },
+                { emoji: '🩱', color: '#5b9bd5', category: 'colors' },
+                { emoji: '🧦', color: '#f2f2f2', category: 'whites' },
+                { emoji: '👒', color: '#6b5b4f', category: 'darks' },
+                { emoji: '🩲', color: '#e8e8e8', category: 'lights' },
+                { emoji: '👘', color: '#7b1fa2', category: 'colors' }
+            ]
+        };
+
+        function setDifficulty(newDifficulty) {
+            difficulty = newDifficulty;
+            
+            // Update UI
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.difficulty-btn.${newDifficulty}`).classList.add('active');
+            document.getElementById('currentDifficulty').textContent = 
+                newDifficulty.charAt(0).toUpperCase() + newDifficulty.slice(1);
+            
+            // Reset game if active
+            if (gameActive) {
+                startGame();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('lives').textContent = lives;
+        }
+
+        function generateClothes() {
+            const container = document.getElementById('clothesContainer');
+            container.innerHTML = '';
+            currentClothes = [];
+            mistakesThisLevel = 0;
+
+            const settings = difficultySettings[difficulty];
+            const baseItemCount = settings.itemCount;
+            const itemCount = Math.min(baseItemCount + Math.floor(level / 3), 12);
+            
+            // Get appropriate clothing items based on difficulty
+            const availableItems = clothingItemsByDifficulty[settings.colorVariation];
+            
+            for (let i = 0; i < itemCount; i++) {
+                const item = availableItems[Math.floor(Math.random() * availableItems.length)];
+                const clothingElement = document.createElement('div');
+                clothingElement.className = 'clothing-item';
+                clothingElement.draggable = true;
+                clothingElement.dataset.category = item.category;
+                clothingElement.style.background = item.color === '#ffffff' ? '#ffffff' : item.color;
+                clothingElement.style.border = item.color === '#ffffff' || item.color.includes('f') ? '2px solid #ddd' : 'none';
+                clothingElement.innerHTML = item.emoji;
+                
+                // Adjust size based on difficulty
+                const sizeMap = {
+                    large: '1.5em',
+                    medium: '1.3em', 
+                    small: '1.1em',
+                    tiny: '0.9em'
+                };
+                clothingElement.style.fontSize = sizeMap[settings.itemSizes];
+                
+                // Adjust item size
+                const itemSizeMap = {
+                    large: '70px',
+                    medium: '60px',
+                    small: '50px', 
+                    tiny: '45px'
+                };
+                clothingElement.style.width = itemSizeMap[settings.itemSizes];
+                clothingElement.style.height = itemSizeMap[settings.itemSizes];
+                
+                clothingElement.addEventListener('dragstart', handleDragStart);
+                clothingElement.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(clothingElement);
+                currentClothes.push(clothingElement);
+            }
+        }
+
+        function handleDragStart(e) {
+            if (!gameActive) return;
+            e.dataTransfer.setData('text/plain', e.target.dataset.category);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function setupBaskets() {
+            const baskets = document.querySelectorAll('.basket');
+            baskets.forEach(basket => {
+                basket.addEventListener('dragover', handleDragOver);
+                basket.addEventListener('drop', handleDrop);
+                basket.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const basket = e.currentTarget;
+            basket.classList.remove('drag-over');
+            
+            if (!gameActive) return;
+
+            const draggedCategory = e.dataTransfer.getData('text/plain');
+            const basketCategory = basket.dataset.category;
+            
+            const draggedElement = document.querySelector('.dragging');
+            const settings = difficultySettings[difficulty];
+            
+            if (draggedCategory === basketCategory) {
+                // Correct drop
+                const points = Math.floor(10 * level * settings.scoreMultiplier);
+                score += points;
+                correctSorts++;
+                basket.classList.add('correct');
+                setTimeout(() => basket.classList.remove('correct'), 600);
+                
+                if (draggedElement) {
+                    draggedElement.remove();
+                    currentClothes = currentClothes.filter(item => item !== draggedElement);
+                }
+                
+                // Check if level complete
+                if (currentClothes.length === 0) {
+                    levelComplete();
+                }
+            } else {
+                // Incorrect drop
+                mistakesThisLevel++;
+                incorrectSorts++;
+                basket.classList.add('incorrect');
+                setTimeout(() => basket.classList.remove('incorrect'), 600);
+                
+                // Check if mistakes exceed allowed limit
+                if (mistakesThisLevel > settings.allowedMistakes) {
+                    lives--;
+                    if (lives <= 0) {
+                        endGame();
+                        return;
+                    }
+                    // Reset level with penalty
+                    score = Math.max(0, score - 20);
+                    generateClothes(); // Restart current level
+                }
+            }
+            
+            updateDisplay();
+        }
+
+        function levelComplete() {
+            level++;
+            updateDisplay();
+            setTimeout(() => {
+                generateClothes();
+            }, 1000);
+        }
+
+        function startGame() {
+            score = 0;
+            correctSorts = 0;
+            incorrectSorts = 0;
+            level = 1;
+            const settings = difficultySettings[difficulty];
+            lives = settings.maxLives;
+            gameActive = true;
+            mistakesThisLevel = 0;
+            
+            document.getElementById('gameOver').classList.add('hidden');
+            updateDisplay();
+            generateClothes();
+        }
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').classList.remove('hidden');
+
+            const totalSorted = correctSorts + incorrectSorts;
+            const accuracy = totalSorted > 0 ? Math.round((correctSorts / totalSorted) * 100) : 0;
+            const studentId = localStorage.getItem("selectedStudentId");
+
+
+            const sessionData = {
+                student_id: studentId, // Set actual student ID if you have it
+                score: score,
+                levelReached: level,
+                difficulty: difficulty,
+                correctSorts: correctSorts,
+                incorrectSorts: incorrectSorts,
+                totalSorted: totalSorted,
+                accuracy: accuracy,
+                livesLeft: lives
+            };
+
+            // Send data to PHP via POST
+            fetch('save_session.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sessionData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log("Data saved:", result);
+            })
+            .catch(error => {
+                console.error("Error saving session:", error);
+            });
+        }
+
+
+        function nextLevel() {
+            if (gameActive && currentClothes.length === 0) {
+                levelComplete();
+            }
+        }
+
+        // Initialize game
+        setupBaskets();
+        updateDisplay();
+        generateClothes();
+    </script>
+</body>
+</html>
