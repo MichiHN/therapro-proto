@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hand Washing Therapy - Multi Level</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #b2dfdb);
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #00796b;
+      margin-bottom: 10px;
+    }
+    #levelInfo {
+      background: rgba(255,255,255,0.9);
+      padding: 15px;
+      border-radius: 15px;
+      margin: 20px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    #game {
+      margin-top: 30px;
+    }
+    #hands {
+      width: 280px;
+      height: 280px;
+      background: url('https://www.clker.com/cliparts/t/h/F/y/l/W/two-hands-open.svg.med.png') no-repeat center center;
+      background-size: contain;
+      margin: 20px auto;
+      border-radius: 15px;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transition: transform 0.2s ease;
+    }
+    #hands:hover {
+      transform: scale(1.02);
+    }
+    .bubble {
+      width: 15px;
+      height: 15px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      opacity: 0.8;
+      pointer-events: none;
+      animation: bubbleFloat 1s ease-out forwards;
+    }
+    .soap-bubble {
+      background: #ffc107;
+      box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    .water-drop {
+      background: #2196f3;
+      border-radius: 50% 0 50% 50%;
+      transform: rotate(-45deg);
+      animation: waterDrop 0.8s ease-out forwards;
+    }
+    @keyframes bubbleFloat {
+      0% { transform: scale(0) translateY(0); opacity: 1; }
+      100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
+    }
+    @keyframes waterDrop {
+      0% { transform: rotate(-45deg) scale(0) translateY(0); opacity: 1; }
+      100% { transform: rotate(-45deg) scale(1) translateY(20px); opacity: 0; }
+    }
+    #soap {
+      position: absolute;
+      width: 40px;
+      height: 25px;
+      background: #ffc107;
+      border-radius: 10px;
+      top: 20px;
+      left: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    #soap:hover {
+      transform: scale(1.1);
+    }
+    #towel {
+      position: absolute;
+      width: 60px;
+      height: 40px;
+      background: #8bc34a;
+      border-radius: 8px;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(139, 195, 74, 0.4);
+      transition: all 0.3s ease;
+    }
+    #towel:hover {
+      transform: scale(1.1);
+    }
+    #towel::before {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 3px;
+      background: #689f38;
+      top: 8px;
+      left: 5px;
+      border-radius: 2px;
+    }
+    #towel::after {
+      content: '';
+      position: absolute;
+      width: 50px;
+      height: 3px;
+      background: #689f38;
+      bottom: 8px;
+      left: 5px;
+      border-radius: 2px;
+    }
+    #hose {
+      position: absolute;
+      width: 80px;
+      height: 20px;
+      background: linear-gradient(90deg, #424242, #616161);
+      border-radius: 10px;
+      top: 30px;
+      right: 30px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(66, 66, 66, 0.4);
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    #hose:hover {
+      transform: scale(1.05);
+    }
+    #hose::before {
+      content: '';
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: #37474f;
+      border-radius: 50%;
+      left: -8px;
+      top: 2.5px;
+    }
+    #hose::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #263238;
+      border-radius: 50%;
+      left: 85px;
+      top: 6px;
+    }
+    .water-stream {
+      position: absolute;
+      width: 3px;
+      background: linear-gradient(180deg, rgba(33, 150, 243, 0.8), rgba(33, 150, 243, 0.3));
+      border-radius: 2px;
+      pointer-events: none;
+      animation: waterStream 0.6s linear forwards;
+    }
+    @keyframes waterStream {
+      0% { 
+        height: 0px; 
+        opacity: 1; 
+      }
+      70% { 
+        height: 60px; 
+        opacity: 0.8; 
+      }
+      100% { 
+        height: 80px; 
+        opacity: 0; 
+      }
+    }
+    .water-splash {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #2196f3;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: waterSplash 0.8s ease-out forwards;
+    }
+    @keyframes waterSplash {
+      0% { 
+        transform: scale(0.5) translate(0, 0); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: scale(1.5) translate(var(--splash-x, 0), var(--splash-y, 0)); 
+        opacity: 0; 
+      }
+    }
+    #backButton {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    #backButton:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    #progress {
+      height: 35px;
+      width: 350px;
+      background: rgba(178, 223, 219, 0.8);
+      margin: 20px auto;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+    #bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #00796b, #4db6ac);
+      transition: width 0.3s ease;
+      border-radius: 20px;
+    }
+    #message {
+      font-size: 1.4rem;
+      color: #388e3c;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    #nextLevel {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 15px;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      transition: all 0.3s ease;
+    }
+    #nextLevel:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+    .level-complete {
+      background: #c8e6c9;
+      border: 2px solid #4caf50;
+    }
+    .instruction {
+      font-size: 1.1rem;
+      color: #00695c;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  
+
+  <h1>🧼 Hand Washing Therapy</h1>
+  <div id="levelInfo">
+    <div id="levelTitle">Level 1: Apply Soap</div>
+    <div id="instruction" class="instruction">Click the soap bar to apply it to your hands!</div>
+  </div>
+  
+  <div id="game">
+    <div id="hands" title="Follow the level instructions!">
+      <div id="soap" style="display: block;"></div>
+      <div id="towel" style="display: none;"></div>
+      <div id="hose" style="display: none;"></div>
+    </div>
+    <div id="progress"><div id="bar"></div></div>
+    <div id="message"></div>
+    <button id="nextLevel" style="display: none;">Next Level</button>
+  </div>
+
+  <script>
+    const hands = document.getElementById("hands");
+    const bar = document.getElementById("bar");
+    const message = document.getElementById("message");
+    const levelTitle = document.getElementById("levelTitle");
+    const instruction = document.getElementById("instruction");
+    const soap = document.getElementById("soap");
+    const towel = document.getElementById("towel");
+    const hose = document.getElementById("hose");
+    const nextButton = document.getElementById("nextLevel");
+    
+    let currentLevel = 1;
+    let progress = 0;
+    const maxProgress = 100;
+    let isMouseDown = false;
+    
+    
+    const levels = {
+      1: {
+        title: "Level 1: Apply Soap",
+        instruction: "Drag the soap bar around your hands to apply it!",
+        action: "soap"
+      },
+      2: {
+        title: "Level 2: Scrub Hands",
+        instruction: "Click and drag to scrub your hands thoroughly!",
+        action: "scrub"
+      },
+      3: {
+        title: "Level 3: Rinse with Water",
+        instruction: "Drag the hose around to spray water and rinse off the soap!",
+        action: "rinse"
+      },
+      4: {
+        title: "Level 4: Dry Hands",
+        instruction: "Drag the towel around your hands to dry them!",
+        action: "dry"
+      }
+    };
+
+    function createWaterStream(x, y) {
+      const stream = document.createElement("div");
+      stream.classList.add("water-stream");
+      stream.style.left = `${x - 1.5}px`;
+      stream.style.top = `${y}px`;
+      hands.appendChild(stream);
+      
+      // Create splash effect at the end of the stream
+      setTimeout(() => {
+        for (let i = 0; i < 4; i++) {
+          const splash = document.createElement("div");
+          splash.classList.add("water-splash");
+          const angle = (i * 90) + Math.random() * 45;
+          const distance = 15 + Math.random() * 10;
+          const splashX = Math.cos(angle * Math.PI / 180) * distance;
+          const splashY = Math.sin(angle * Math.PI / 180) * distance;
+          
+          splash.style.left = `${x + splashX - 3}px`;
+          splash.style.top = `${y + 60 + splashY - 3}px`;
+          splash.style.setProperty('--splash-x', `${splashX}px`);
+          splash.style.setProperty('--splash-y', `${splashY}px`);
+          
+          hands.appendChild(splash);
+          setTimeout(() => splash.remove(), 800);
+        }
+      }, 400);
+      
+      setTimeout(() => stream.remove(), 600);
+    }
+
+     function goBack() {
+      window.history.back(); // Or: window.location.href = "dash.html";
+    }
+
+    function createEffect(x, y, type) {
+      const effect = document.createElement("div");
+      
+      if (type === "soap") {
+        effect.classList.add("bubble", "soap-bubble");
+      } else if (type === "scrub") {
+        effect.classList.add("bubble");
+      } else if (type === "rinse") {
+        effect.classList.add("water-drop");
+      }
+      
+      effect.style.left = `${x - 8}px`;
+      effect.style.top = `${y - 8}px`;
+      hands.appendChild(effect);
+      
+      setTimeout(() => effect.remove(), 1000);
+    }
+
+    function updateProgress(amount) {
+      if (progress >= maxProgress) return;
+      
+      progress += amount;
+      if (progress > maxProgress) progress = maxProgress;
+      bar.style.width = `${progress}%`;
+      
+      if (progress >= maxProgress) {
+        completeLevel();
+      }
+    }
+
+    function completeLevel() {
+      hands.classList.add("level-complete");
+      
+      if (currentLevel === 4) {
+        message.textContent = "🎉 Congratulations! Perfect hand washing technique!";
+        instruction.textContent = "All levels completed! Your hands are perfectly clean!";
+      } else {
+        message.textContent = `✨ Level ${currentLevel} Complete!`;
+        nextButton.style.display = "inline-block";
+      }
+    }
+
+    function setupLevel() {
+      const level = levels[currentLevel];
+      levelTitle.textContent = level.title;
+      instruction.textContent = level.instruction;
+      progress = 0;
+      bar.style.width = "0%";
+      message.textContent = "";
+      nextButton.style.display = "none";
+      hands.classList.remove("level-complete");
+      
+      // Show/hide and reset position of elements based on level
+      if (currentLevel === 1) {
+        soap.style.display = "block";
+        soap.style.left = "20px";
+        soap.style.top = "20px";
+        soap.style.transform = "none";
+      } else {
+        soap.style.display = "none";
+      }
+      
+      if (currentLevel === 3) {
+        hose.style.display = "block";
+        hose.style.right = "30px";
+        hose.style.top = "30px";
+        hose.style.transform = "none";
+      } else {
+        hose.style.display = "none";
+      }
+      
+      if (currentLevel === 4) {
+        towel.style.display = "block";
+        towel.style.left = "20px";
+        towel.style.top = "20px";
+        towel.style.transform = "none";
+      } else {
+        towel.style.display = "none";
+      }
+    }
+
+    function resetSoapPosition() {
+      soap.style.left = "20px";
+      soap.style.top = "20px";
+      soap.style.transform = "none";
+    }
+
+    function resetHosePosition() {
+      hose.style.right = "30px";
+      hose.style.top = "30px";
+      hose.style.transform = "none";
+    }
+
+    function resetTowelPosition() {
+      towel.style.left = "20px";
+      towel.style.top = "20px";
+      towel.style.transform = "none";
+    }
+
+    function handleSoapDrag(e) {
+      if (currentLevel !== 1) return;
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
+      const y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
+      soap.style.left = `${x - 20}px`;
+      soap.style.top = `${y - 12.5}px`;
+      soap.style.transform = "none";
+      createEffect(x, y, "soap");
+      updateProgress(0.08);
+    }
+
+    function handleSoapClick(e) {
+      if (currentLevel !== 1) return;
+      
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      createEffect(x, y, "soap");
+      updateProgress(0.08);
+    }
+
+    function handleScrub(e) {
+      if (currentLevel !== 2) return;
+
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
+      const y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
+
+      createEffect(x, y, "scrub");
+      updateProgress(0.08);
+    }
+
+
+    function handleRinse(e) {
+      if (currentLevel !== 3) return;
+      
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      createEffect(x, y, "rinse");
+      updateProgress(0.08);
+    }
+
+    function handleHoseDrag(e) {
+      if (currentLevel !== 3) return;
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
+      const y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
+      // Move hose to touch/mouse position, positioned from the right
+      const handsRect = hands.getBoundingClientRect();
+      hose.style.right = `${280 - x - 40}px`;
+      hose.style.top = `${y - 10}px`;
+      hose.style.transform = "none";
+      // Create water stream effect
+      createWaterStream(x, y);
+      createEffect(x + 20, y + 50, "rinse"); // Add some water drop effects too
+      updateProgress(0.08);
+    }
+
+    function handleHoseClick(e) {
+      if (currentLevel !== 3) return;
+      
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      createWaterStream(x, y);
+      createEffect(x, y, "rinse");
+      updateProgress(0.08);
+    }
+
+    
+    function handleTowelDrag(e) {
+      if (currentLevel !== 4) return;
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
+      const y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
+      // Move towel to touch/mouse position, centered on cursor
+      towel.style.left = `${x - 30}px`;
+      towel.style.top = `${y - 20}px`;
+      towel.style.transform = "none";
+      // Create multiple small effects for drying
+      for (let i = 0; i < 2; i++) {
+        setTimeout(() => {
+          const sparkle = document.createElement("div");
+          sparkle.style.position = "absolute";
+          sparkle.style.left = `${x + (Math.random() - 0.5) * 30}px`;
+          sparkle.style.top = `${y + (Math.random() - 0.5) * 30}px`;
+          sparkle.style.width = "6px";
+          sparkle.style.height = "6px";
+          sparkle.style.background = "#fff";
+          sparkle.style.borderRadius = "50%";
+          sparkle.style.pointerEvents = "none";
+          sparkle.style.animation = "bubbleFloat 0.5s ease-out forwards";
+          hands.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 500);
+        }, i * 50);
+      }
+      updateProgress(0.08);
+
+    }
+
+    function handleTowelClick(e) {
+      if (currentLevel !== 4) return;
+      
+      const rect = hands.getBoundingClientRect();
+      const x = Math.random() * 200 + 40;
+      const y = Math.random() * 200 + 40;
+      
+      // Create multiple small effects for drying
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const sparkle = document.createElement("div");
+          sparkle.style.position = "absolute";
+          sparkle.style.left = `${x + (Math.random() - 0.5) * 40}px`;
+          sparkle.style.top = `${y + (Math.random() - 0.5) * 40}px`;
+          sparkle.style.width = "8px";
+          sparkle.style.height = "8px";
+          sparkle.style.background = "#fff";
+          sparkle.style.borderRadius = "50%";
+          sparkle.style.pointerEvents = "none";
+          sparkle.style.animation = "bubbleFloat 0.6s ease-out forwards";
+          hands.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 600);
+        }, i * 100);
+      }
+      
+      updateProgress(0.08);
+    }
+
+    // Event listeners
+    let isDraggingSoap = false;
+    let isDraggingHose = false;
+    let isDraggingTowel = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    function updateSoapPosition(x, y) {
+      soap.style.left = `${x - 20}px`;
+      soap.style.top = `${y - 12.5}px`;
+      createEffect(x, y, "soap");
+      updateProgress(0.08);
+    }
+
+    function updateHosePosition(x, y) {
+      hose.style.right = `${280 - x - 40}px`;
+      hose.style.top = `${y - 10}px`;
+      createWaterStream(x, y);
+      createEffect(x + 20, y + 50, "rinse");
+      updateProgress(0.08);
+    }
+
+    function updateTowelPosition(x, y) {
+      towel.style.left = `${x - 30}px`;
+      towel.style.top = `${y - 20}px`;
+      updateProgress(0.08);
+    }
+
+    function handleMouseMove(e) {
+      const rect = hands.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (isDraggingSoap) {
+        updateSoapPosition(x, y);
+      } else if (isDraggingHose) {
+        updateHosePosition(x, y);
+      } else if (isDraggingTowel) {
+        updateTowelPosition(x, y);
+      }
+    }
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDraggingSoap || isDraggingHose || isDraggingTowel) {
+        requestAnimationFrame(() => handleMouseMove(e));
+      }
+    });
+
+    // Event listeners for dragging
+    soap.addEventListener("mousedown", (e) => {
+      if (currentLevel === 1) {
+        isDraggingSoap = true;
+        e.preventDefault();
+      }
+    });
+
+    hose.addEventListener("mousedown", (e) => {
+      if (currentLevel === 3) {
+        isDraggingHose = true;
+        e.preventDefault();
+      }
+    });
+
+    towel.addEventListener("mousedown", (e) => {
+      if (currentLevel === 4) {
+        isDraggingTowel = true;
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDraggingSoap) {
+        isDraggingSoap = false;
+        resetSoapPosition();
+      }
+      if (isDraggingHose) {
+        isDraggingHose = false;
+        resetHosePosition();
+      }
+      if (isDraggingTowel) {
+        isDraggingTowel = false;
+        resetTowelPosition();
+      }
+    });
+
+
+    document.addEventListener("mousemove", (e) => {
+      if (isDraggingSoap) {
+        handleSoapDrag(e);
+      } else if (isDraggingHose) {
+        handleHoseDrag(e);
+      } else if (isDraggingTowel) {
+        handleTowelDrag(e);
+      }
+    });
+
+    hands.addEventListener("mousedown", (e) => {
+      if (!isDraggingSoap && !isDraggingHose && !isDraggingTowel) {
+        isMouseDown = true;
+        if (currentLevel === 2) handleScrub(e);
+        if (currentLevel === 3) handleRinse(e);
+      }
+    });
+
+    hands.addEventListener("mouseup", () => {
+      isMouseDown = false;
+    });
+
+    hands.addEventListener("mouseup", () => {
+      isMouseDown = false;
+    });
+
+    hands.addEventListener("mousemove", (e) => {
+      if (isMouseDown && !isDraggingSoap && !isDraggingHose && !isDraggingTowel) {
+        if (currentLevel === 2) handleScrub(e);
+        if (currentLevel === 3) handleRinse(e);
+      }
+    });
+
+    hands.addEventListener("click", (e) => {
+      if (!isDraggingSoap && !isDraggingHose && !isDraggingTowel) {
+        if (currentLevel === 2) handleScrub(e);
+        if (currentLevel === 3) handleRinse(e);
+      }
+    });
+
+    // Add touch event listeners for soap, hose, and towel
+    soap.addEventListener("touchstart", (e) => {
+      if (currentLevel === 1) {
+        isDraggingSoap = true;
+        e.preventDefault();
+      }
+    });
+
+    hands.addEventListener("touchstart", (e) => {
+      if (!isDraggingSoap && !isDraggingHose && !isDraggingTowel) {
+        isMouseDown = true;
+        if (currentLevel === 2) handleScrub(e);
+        if (currentLevel === 3) handleRinse(e);
+      }
+    });
+
+
+    hose.addEventListener("touchstart", (e) => {
+      if (currentLevel === 3) {
+        isDraggingHose = true;
+        e.preventDefault();
+      }
+    });
+
+    towel.addEventListener("touchstart", (e) => {
+      if (currentLevel === 4) {
+        isDraggingTowel = true;
+        e.preventDefault();
+      }
+    });
+
+    // Update the mouse move handler to handle touch move
+    document.addEventListener("touchmove", (e) => {
+      if (isDraggingSoap) {
+        handleSoapDrag(e.touches[0]);
+      } else if (isDraggingHose) {
+        handleHoseDrag(e.touches[0]);
+      } else if (isDraggingTowel) {
+        handleTowelDrag(e.touches[0]);
+      }
+    });
+
+    document.addEventListener("touchmove", (e) => {
+      if (isMouseDown && !isDraggingSoap && !isDraggingHose && !isDraggingTowel) {
+        if (currentLevel === 2) handleScrub(e);
+        if (currentLevel === 3) handleRinse(e);
+      }
+    });
+
+    // Update the mouse up handler to handle touch end
+    document.addEventListener("touchend", () => {
+      if (isDraggingSoap) {
+        isDraggingSoap = false;
+        resetSoapPosition();
+      }
+      if (isDraggingHose) {
+        isDraggingHose = false;
+        resetHosePosition();
+      }
+      if (isDraggingTowel) {
+        isDraggingTowel = false;
+        resetTowelPosition();
+      }
+    });
+    
+    hands.addEventListener("touchend", () => {
+      isMouseDown = false;
+    });
+
+
+    soap.addEventListener("click", handleSoapClick);
+    hose.addEventListener("click", handleHoseClick);
+    towel.addEventListener("click", handleTowelClick);
+
+    nextButton.addEventListener("click", () => {
+      currentLevel++;
+      setupLevel();
+    });
+
+    // Initialize first level
+    setupLevel();
+  </script>
+</body>
+</html>
